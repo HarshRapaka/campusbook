@@ -3,578 +3,645 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CampusBook — Room & Resource Booking System</title>
+<title>CampusBook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh}
-  .app{max-width:1100px;margin:0 auto;padding:1rem}
-  .header{background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-  .logo{font-size:18px;font-weight:600;letter-spacing:-0.3px}
-  .logo span{color:#185FA5}
-  .nav{display:flex;gap:6px;flex-wrap:wrap}
-  .nav button{padding:6px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:transparent;font-size:13px;cursor:pointer;color:#1a1a1a;transition:background 0.15s}
-  .nav button.active{background:#185FA5;color:#fff;border-color:#185FA5}
-  .nav button:hover:not(.active){background:#f0f0ee}
-  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
-  .badge-warn{background:#FAEEDA;color:#633806}
-  .badge-success{background:#EAF3DE;color:#27500A}
-  .badge-danger{background:#FCEBEB;color:#501313}
-  .badge-info{background:#E6F1FB;color:#0C447C}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-  @media(max-width:700px){.grid2{grid-template-columns:1fr}}
-  .card{background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
-  .card h2{font-size:15px;font-weight:600;margin-bottom:1rem}
-  label{font-size:13px;color:#555;display:block;margin-bottom:4px;margin-top:12px}
-  select,input[type=text],input[type=date],textarea{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:#fff;color:#1a1a1a;font-size:13px;font-family:inherit}
-  textarea{resize:vertical;min-height:60px}
-  .btn{padding:8px 18px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:transparent;font-size:13px;cursor:pointer;color:#1a1a1a;transition:all 0.15s;font-family:inherit}
-  .btn:hover{background:#f0f0ee}
-  .btn-primary{background:#185FA5;color:#fff;border-color:#185FA5}
-  .btn-primary:hover{background:#0C447C;border-color:#0C447C}
-  .btn-success{background:#3B6D11;color:#fff;border-color:#3B6D11}
-  .btn-success:hover{background:#27500A}
-  .btn-danger{background:#A32D2D;color:#fff;border-color:#A32D2D}
-  .btn-danger:hover{background:#791F1F}
-  .btn-sm{padding:4px 10px;font-size:12px}
-  .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;margin-top:0.5rem}
-  .slot{padding:6px 8px;border-radius:8px;border:1px solid transparent;font-size:12px;text-align:center;cursor:pointer;transition:all 0.15s}
-  .slot.free{background:#EAF3DE;color:#27500A;border-color:#C0DD97}
-  .slot.free:hover{background:#C0DD97}
-  .slot.booked{background:#FCEBEB;color:#501313;border-color:#F7C1C1;cursor:not-allowed}
-  .slot.pending{background:#FAEEDA;color:#633806;border-color:#FAC775;cursor:not-allowed}
-  .slot.selected{background:#185FA5;color:#fff;border-color:#185FA5}
-  .resource-card{border:1px solid rgba(0,0,0,0.1);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:all 0.15s}
-  .resource-card:hover{border-color:rgba(0,0,0,0.3)}
-  .resource-card.selected{border:2px solid #185FA5;background:#E6F1FB}
-  .resource-card .name{font-size:14px;font-weight:600}
-  .resource-card .meta{font-size:12px;color:#666;margin-top:2px}
-  .booking-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
-  .booking-row:last-child{border-bottom:none}
-  .booking-info{flex:1;min-width:180px}
-  .booking-info .title{font-size:13px;font-weight:600}
-  .booking-info .sub{font-size:12px;color:#666;margin-top:2px}
-  .booking-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
-  .alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:1rem}
-  .alert-success{background:#EAF3DE;color:#27500A;border:1px solid #C0DD97}
-  .alert-danger{background:#FCEBEB;color:#501313;border:1px solid #F7C1C1}
-  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:0.75rem}
-  .legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
-  .legend-dot{width:10px;height:10px;border-radius:2px}
-  .section-tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
-  .section-tab{padding:5px 12px;border-radius:20px;font-size:12px;border:1px solid rgba(0,0,0,0.2);background:transparent;cursor:pointer;color:#666}
-  .section-tab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
-  .stat{background:#f0f0ee;border-radius:8px;padding:10px 12px}
-  .stat .num{font-size:22px;font-weight:600}
-  .stat .lbl{font-size:12px;color:#666;margin-top:2px}
-  .empty{text-align:center;padding:2rem;color:#888;font-size:13px}
-  .date-nav{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
-  .date-nav button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:transparent;cursor:pointer;font-size:14px;color:#1a1a1a;display:flex;align-items:center;justify-content:center}
-  .date-nav span{font-size:14px;font-weight:600}
-  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:#f0f0ee;color:#555;margin-right:4px}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #f5f3ef;
+  --surface:  #ffffff;
+  --surface2: #faf9f7;
+  --surface3: #f0ede8;
+  --line:     rgba(0,0,0,0.07);
+  --line2:    rgba(0,0,0,0.12);
+  --line3:    rgba(0,0,0,0.20);
+  --ink:      #181613;
+  --ink2:     #3d3830;
+  --ink3:     #7a736b;
+  --ink4:     #b0a89e;
+  --green:    #1a6e42;
+  --greenbg:  rgba(26,110,66,0.07);
+  --greenbdr: rgba(26,110,66,0.2);
+  --red:      #b83232;
+  --redbg:    rgba(184,50,50,0.07);
+  --redbdr:   rgba(184,50,50,0.18);
+  --amber:    #9a5f00;
+  --amberbg:  rgba(154,95,0,0.07);
+  --amberbdr: rgba(154,95,0,0.2);
+  --r:8px;--r2:14px;
+}
+html,body{height:100%}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+
+.shell{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:256px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:10;transition:transform 0.3s ease}
+.sb-top{padding:26px 22px 18px;border-bottom:1px solid var(--line)}
+.sb-wordmark{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;letter-spacing:-0.5px;color:var(--ink)}
+.sb-wordmark em{color:var(--ink3);font-style:normal;font-weight:500}
+.sb-tagline{font-size:10px;color:var(--ink4);letter-spacing:1.4px;text-transform:uppercase;margin-top:3px}
+.sb-nav{padding:18px 12px;flex:1;overflow-y:auto}
+.sb-group{font-size:9px;color:var(--ink4);letter-spacing:1.8px;text-transform:uppercase;padding:0 8px;margin-bottom:6px;margin-top:18px}
+.sb-group:first-child{margin-top:0}
+.sb-btn{display:flex;align-items:center;gap:10px;width:100%;padding:8px 8px;border-radius:var(--r);border:none;background:transparent;color:var(--ink3);font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;text-align:left;position:relative}
+.sb-icon{width:30px;height:30px;border-radius:7px;background:var(--surface3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.15s;flex-shrink:0}
+.sb-btn:hover{color:var(--ink);background:var(--surface2)}
+.sb-btn:hover .sb-icon{background:var(--surface3);border-color:var(--line2)}
+.sb-btn.active{color:var(--ink);background:var(--surface3)}
+.sb-btn.active .sb-icon{background:var(--surface);border-color:var(--line2);box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.sb-btn.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:2px;height:18px;background:var(--ink);border-radius:0 2px 2px 0}
+.sb-badge{margin-left:auto;background:var(--amber);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;font-family:'Syne',sans-serif}
+.sb-bottom{padding:14px 12px;border-top:1px solid var(--line)}
+.mode-toggle{display:flex;border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;background:var(--surface3)}
+.mode-btn{flex:1;padding:7px 8px;border:none;background:transparent;font-family:'Instrument Sans',sans-serif;font-size:11px;font-weight:500;color:var(--ink3);cursor:pointer;transition:all 0.15s;text-align:center}
+.mode-btn.active{background:var(--ink);color:#fff;font-weight:600}
+
+/* MAIN */
+.main{margin-left:256px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{padding:18px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5;gap:16px;flex-wrap:wrap}
+.page-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.4px;line-height:1}
+.page-sub{font-size:11px;color:var(--ink3);margin-top:3px}
+.dot-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3)}
+.dot-status::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 2px var(--greenbg)}
+
+/* TOAST */
+#alertBox{position:fixed;top:20px;right:22px;z-index:100;padding:11px 16px;border-radius:var(--r2);font-size:13px;font-weight:500;display:none;align-items:center;gap:9px;max-width:340px;animation:slideIn 0.22s ease;box-shadow:0 4px 24px rgba(0,0,0,0.1),0 0 0 1px rgba(0,0,0,0.05)}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px) scale(0.98)}to{opacity:1;transform:none}}
+.alert-success{background:var(--surface);color:var(--green);border:1px solid var(--greenbdr)}
+.alert-danger{background:var(--surface);color:var(--red);border:1px solid var(--redbdr)}
+
+/* CONTENT */
+.content{padding:26px 32px;flex:1}
+
+/* LAYOUT */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;animation:fadeUp 0.25s ease both}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink3)}
+.panel-body{padding:18px}
+
+/* STAT CARDS */
+.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s}
+.stat-card:hover{border-color:var(--line2);box-shadow:0 2px 12px rgba(0,0,0,0.05)}
+.stat-num{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;line-height:1;margin-bottom:6px}
+.stat-lbl{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3)}
+.stat-card.s-amber .stat-num{color:var(--amber)}
+.stat-card.s-green  .stat-num{color:var(--green)}
+.stat-card.s-ink    .stat-num{color:var(--ink)}
+
+/* FILTER */
+.filter-row{display:flex;gap:5px;flex-wrap:wrap;padding:0 18px 14px}
+.fpill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid var(--line2);background:transparent;color:var(--ink3);cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all 0.14s}
+.fpill:hover{border-color:var(--line3);color:var(--ink)}
+.fpill.active{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* RESOURCE ITEMS */
+.res-item{display:flex;align-items:center;gap:12px;padding:11px 18px;cursor:pointer;border-bottom:1px solid var(--line);transition:background 0.12s;position:relative}
+.res-item:last-child{border-bottom:none}
+.res-item:hover{background:var(--surface2)}
+.res-item.active{background:var(--surface3)}
+.res-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--ink)}
+.res-icon{width:34px;height:34px;border-radius:8px;flex-shrink:0;background:var(--surface3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px}
+.res-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.2}
+.res-meta{font-size:11px;color:var(--ink3);margin-top:2px}
+.res-right{margin-left:auto;text-align:right;flex-shrink:0}
+.res-cap{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--ink2)}
+.res-type{font-size:9px;color:var(--ink4);letter-spacing:0.5px;text-transform:uppercase;margin-top:1px}
+
+/* AVAIL PANEL */
+.avail-empty{padding:52px 20px;text-align:center;color:var(--ink3);font-size:13px}
+.avail-empty .big{font-family:'Instrument Serif',serif;font-style:italic;font-size:30px;color:var(--ink4);display:block;margin-bottom:6px}
+.res-banner{padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface2)}
+.res-banner-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--ink)}
+.res-banner-meta{font-size:11px;color:var(--ink3);margin-top:2px}
+.date-bar{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.date-arrow{width:28px;height:28px;border-radius:7px;border:1px solid var(--line2);background:transparent;color:var(--ink3);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.14s;flex-shrink:0}
+.date-arrow:hover{background:var(--surface3);color:var(--ink);border-color:var(--line3)}
+.date-display{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;flex:1;letter-spacing:-0.2px;color:var(--ink)}
+.date-input{padding:5px 9px;border-radius:7px;border:1px solid var(--line2);background:var(--surface3);color:var(--ink);font-size:11px;font-family:'Instrument Sans',sans-serif;cursor:pointer;outline:none;transition:border-color 0.14s}
+.date-input:focus{border-color:var(--line3)}
+.legend-bar{display:flex;gap:14px;padding:9px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink3);letter-spacing:0.3px;text-transform:uppercase}
+.leg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* SLOTS */
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:5px;padding:14px 18px}
+.slot{padding:9px 6px;border-radius:8px;text-align:center;cursor:pointer;border:1px solid transparent;transition:all 0.14s}
+.slot-t{font-family:'Syne',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:0.2px;display:block;margin-bottom:4px}
+.slot-s{font-size:9px;text-transform:uppercase;letter-spacing:0.7px;font-weight:500}
+.slot.free{background:var(--greenbg);border-color:var(--greenbdr)}
+.slot.free .slot-t{color:var(--green)}
+.slot.free .slot-s{color:rgba(26,110,66,0.55)}
+.slot.free:hover{border-color:var(--green);box-shadow:0 0 0 2px var(--greenbg);transform:translateY(-1px)}
+.slot.booked{background:var(--redbg);border-color:var(--redbdr);cursor:not-allowed;opacity:0.65}
+.slot.booked .slot-t{color:var(--red)}
+.slot.booked .slot-s{color:rgba(184,50,50,0.5)}
+.slot.pending{background:var(--amberbg);border-color:var(--amberbdr);cursor:not-allowed}
+.slot.pending .slot-t{color:var(--amber)}
+.slot.pending .slot-s{color:rgba(154,95,0,0.55)}
+.slot.selected{background:var(--ink);border-color:var(--ink)}
+.slot.selected .slot-t{color:#fff}
+.slot.selected .slot-s{color:rgba(255,255,255,0.55)}
+
+/* BOOKING FORM */
+.booking-form{border-top:1px solid var(--line);padding:18px;animation:fadeUp 0.2s ease}
+.form-sel-label{font-size:10px;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.form-sel-val{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:16px;letter-spacing:-0.3px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10px;color:var(--ink3);letter-spacing:0.9px;text-transform:uppercase;margin-bottom:5px;font-weight:500}
+.field input,.field textarea,.field select{width:100%;padding:9px 12px;border-radius:var(--r);border:1px solid var(--line2);background:var(--surface2);color:var(--ink);font-size:13px;font-family:'Instrument Sans',sans-serif;outline:none;transition:border-color 0.14s,box-shadow 0.14s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--line3);box-shadow:0 0 0 3px rgba(0,0,0,0.04)}
+.field textarea{resize:vertical;min-height:60px}
+.field select option{background:var(--surface)}
+.submit-btn{width:100%;padding:11px;border-radius:var(--r);background:var(--ink);color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.5px;border:none;cursor:pointer;transition:all 0.15s;margin-top:4px}
+.submit-btn:hover{background:#2d2926;box-shadow:0 4px 16px rgba(0,0,0,0.12);transform:translateY(-1px)}
+.submit-btn:active{transform:none;box-shadow:none}
+
+/* BOOKING ROWS */
+.brow{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);animation:fadeUp 0.2s ease both}
+.brow:last-child{border-bottom:none}
+.brow-icon{width:36px;height:36px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;background:var(--surface3);border:1px solid var(--line);margin-top:1px}
+.brow-info{flex:1;min-width:0}
+.brow-title{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px}
+.brow-sub{font-size:11px;color:var(--ink3);margin-top:2px}
+.brow-acts{display:flex;gap:6px;flex-shrink:0;align-items:flex-start;padding-top:1px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;font-family:'Syne',sans-serif}
+.badge::before{content:'';width:4px;height:4px;border-radius:50%}
+.badge-green{background:var(--greenbg);color:var(--green);border:1px solid var(--greenbdr)}
+.badge-green::before{background:var(--green)}
+.badge-red{background:var(--redbg);color:var(--red);border:1px solid var(--redbdr)}
+.badge-red::before{background:var(--red)}
+.badge-amber{background:var(--amberbg);color:var(--amber);border:1px solid var(--amberbdr)}
+.badge-amber::before{background:var(--amber)}
+.badge-mute{background:var(--surface3);color:var(--ink3);border:1px solid var(--line2)}
+.badge-mute::before{background:var(--ink4)}
+.ttag{font-size:9px;letter-spacing:0.8px;text-transform:uppercase;padding:2px 7px;border-radius:4px;font-weight:600;background:var(--surface3);color:var(--ink3);border:1px solid var(--line)}
+
+/* ACTION BUTTONS */
+.abtn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid;font-family:'Syne',sans-serif;letter-spacing:0.3px;transition:all 0.14s}
+.abtn-approve{background:var(--greenbg);color:var(--green);border-color:var(--greenbdr)}
+.abtn-approve:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.abtn-reject{background:var(--redbg);color:var(--red);border-color:var(--redbdr)}
+.abtn-reject:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.abtn-cancel{background:var(--surface3);color:var(--ink3);border-color:var(--line2)}
+.abtn-cancel:hover{border-color:var(--redbdr);color:var(--red)}
+
+/* EMPTY */
+.empty{padding:40px 18px;text-align:center;color:var(--ink4);font-size:13px}
+.empty-big{font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;color:var(--ink3);display:block;margin-bottom:5px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* MOBILE */
+.mob-menu{display:none;width:34px;height:34px;border-radius:8px;border:1px solid var(--line2);background:transparent;cursor:pointer;color:var(--ink);font-size:16px;align-items:center;justify-content:center}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.25);z-index:9}
+.mob-overlay.open{display:block}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:none}
+  .main{margin-left:0}
+  .topbar{padding:14px 18px}
+  .content{padding:18px}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .stats-row .stat-card:last-child{grid-column:span 2}
+  .mob-menu{display:flex!important}
+}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="header">
-    <div class="logo"><span>Campus</span>Book — Resource Booking System</div>
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <div class="nav" id="mainNav">
-        <button class="active" onclick="switchView('user')">Student / Faculty</button>
-        <button onclick="switchView('admin')">Admin Panel</button>
+<div id="mobOverlay" class="mob-overlay" onclick="closeSidebar()"></div>
+<div class="shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <div class="sb-wordmark">Campus<em>Book</em></div>
+      <div class="sb-tagline">Resource Booking System</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-group">Student / Faculty</div>
+      <button class="sb-btn active" id="navBrowse" onclick="gotoView('browse')">
+        <span class="sb-icon">🗓</span> Browse &amp; Book
+      </button>
+      <button class="sb-btn" id="navMine" onclick="gotoView('mine')">
+        <span class="sb-icon">📋</span> My Bookings
+      </button>
+      <div class="sb-group">Administration</div>
+      <button class="sb-btn" id="navPending" onclick="gotoView('pending')">
+        <span class="sb-icon">⏳</span> Pending
+        <span class="sb-badge" id="sbBadge" style="display:none">0</span>
+      </button>
+      <button class="sb-btn" id="navAll" onclick="gotoView('all')">
+        <span class="sb-icon">📊</span> All Bookings
+      </button>
+      <button class="sb-btn" id="navManage" onclick="gotoView('manage')">
+        <span class="sb-icon">⚙️</span> Manage Resources
+      </button>
+    </nav>
+    <div class="sb-bottom">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeUser"  onclick="setRole('user')">Student</button>
+        <button class="mode-btn"        id="modeAdmin" onclick="setRole('admin')">Admin</button>
       </div>
-      <span id="adminBadge" class="badge badge-warn" style="display:none">Admin Mode</span>
     </div>
-  </div>
+  </aside>
 
-  <div id="alertBox" style="display:none"></div>
-
-  <!-- USER VIEW -->
-  <div id="userView">
-    <div class="section-tabs">
-      <button class="section-tab active" onclick="switchSection('browse','user')">Browse & Book</button>
-      <button class="section-tab" onclick="switchSection('myBookings','user')">My Bookings</button>
-    </div>
-    <div id="browseSection">
-      <div class="grid2">
-        <div class="card">
-          <h2>Available Resources</h2>
-          <div class="section-tabs" style="margin-bottom:0.75rem">
-            <button class="section-tab active" onclick="filterResources('all')">All</button>
-            <button class="section-tab" onclick="filterResources('Seminar Hall')">Halls</button>
-            <button class="section-tab" onclick="filterResources('Lab')">Labs</button>
-            <button class="section-tab" onclick="filterResources('Conference')">Conf. Rooms</button>
-            <button class="section-tab" onclick="filterResources('Sports')">Sports</button>
-          </div>
-          <div id="resourceList"></div>
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mob-menu" onclick="openSidebar()">☰</button>
+        <div>
+          <div class="page-title" id="pageTitle">Browse Resources</div>
+          <div class="page-sub"   id="pageSub">Select a space, pick your slot</div>
         </div>
-        <div class="card">
-          <h2>Check Availability & Book</h2>
-          <div id="noResourceMsg" style="color:#888;font-size:13px">Select a resource to view availability.</div>
-          <div id="availPanel" style="display:none">
-            <div style="font-size:14px;font-weight:600;margin-bottom:0.5rem" id="selectedResourceName"></div>
-            <div class="date-nav">
-              <button onclick="changeDate(-1)">&#8249;</button>
-              <span id="dateDisplay"></span>
-              <button onclick="changeDate(1)">&#8250;</button>
-              <input type="date" id="datePicker" style="width:auto;margin-left:auto;font-size:12px;padding:4px 8px" onchange="onDateChange()">
+      </div>
+      <div class="dot-status">System Online</div>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <div class="content">
+
+      <!-- BROWSE -->
+      <div id="viewBrowse">
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head">
+              <span class="panel-title">Spaces</span>
+              <span id="resCount" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--ink2)">9</span>
             </div>
-            <div class="legend">
-              <div class="legend-item"><div class="legend-dot" style="background:#639922"></div> Free</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#E24B4A"></div> Booked</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#BA7517"></div> Pending</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div> Selected</div>
+            <div class="filter-row" style="padding-top:12px">
+              <button class="fpill active" onclick="setFilter('all',this)">All</button>
+              <button class="fpill" onclick="setFilter('Seminar Hall',this)">Halls</button>
+              <button class="fpill" onclick="setFilter('Lab',this)">Labs</button>
+              <button class="fpill" onclick="setFilter('Conference',this)">Conf.</button>
+              <button class="fpill" onclick="setFilter('Sports',this)">Sports</button>
             </div>
-            <div class="slot-grid" id="slotGrid"></div>
-            <div id="slotSelection" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,0.08)">
-              <div style="font-size:13px;font-weight:600;margin-bottom:0.5rem">Selected: <span id="selectedSlotLabel"></span></div>
-              <label>Your Name</label>
-              <input type="text" id="reqName" placeholder="Full name">
-              <label>Purpose / Description</label>
-              <textarea id="reqDesc" placeholder="Describe the purpose of this booking..."></textarea>
-              <label>Expected Attendees</label>
-              <input type="text" id="reqAttendees" placeholder="e.g. 30 students">
-              <div style="margin-top:12px">
-                <button class="btn btn-primary" onclick="submitBooking()">Submit Booking Request</button>
+            <div id="resList"></div>
+          </div>
+          <div class="panel">
+            <div id="availEmpty" class="avail-empty">
+              <span class="big">Pick a space</span>
+              Choose any resource from the left to view its availability calendar
+            </div>
+            <div id="availContent" style="display:none">
+              <div class="res-banner">
+                <div class="res-banner-name" id="bnName">—</div>
+                <div class="res-banner-meta" id="bnMeta">—</div>
+              </div>
+              <div class="date-bar">
+                <button class="date-arrow" onclick="shiftDate(-1)">‹</button>
+                <span class="date-display" id="dateDisp">—</span>
+                <button class="date-arrow" onclick="shiftDate(1)">›</button>
+                <input type="date" class="date-input" id="datePick" onchange="pickDate()">
+              </div>
+              <div class="legend-bar">
+                <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>Free</div>
+                <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>Booked</div>
+                <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div>Pending</div>
+                <div class="leg"><div class="leg-dot" style="background:var(--ink)"></div>Selected</div>
+              </div>
+              <div class="slot-grid" id="slotGrid"></div>
+              <div id="bookForm" class="booking-form" style="display:none">
+                <div class="form-sel-label">Booking for</div>
+                <div class="form-sel-val" id="formSlotLabel">—</div>
+                <div class="field"><label>Full Name</label><input type="text" id="fName" placeholder="e.g. Arjun Mehta"></div>
+                <div class="field"><label>Purpose</label><textarea id="fDesc" placeholder="What's this booking for?"></textarea></div>
+                <div class="field"><label>Attendees</label><input type="text" id="fAtt" placeholder="e.g. 40 students"></div>
+                <button class="submit-btn" onclick="submitBooking()">Request Booking →</button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div id="myBookingsSection" style="display:none">
-      <div class="card">
-        <h2>My Booking History</h2>
-        <div id="myBookingsList"></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ADMIN VIEW -->
-  <div id="adminView" style="display:none">
-    <div class="section-tabs">
-      <button class="section-tab active" onclick="switchSection('pending','admin')">Pending Requests</button>
-      <button class="section-tab" onclick="switchSection('allBookings','admin')">All Bookings</button>
-      <button class="section-tab" onclick="switchSection('resources','admin')">Manage Resources</button>
-    </div>
-    <div class="stat-row">
-      <div class="stat"><div class="num" id="statPending">0</div><div class="lbl">Pending</div></div>
-      <div class="stat"><div class="num" id="statApproved">0</div><div class="lbl">Approved</div></div>
-      <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Requests</div></div>
-    </div>
-    <div id="pendingSection">
-      <div class="card">
-        <h2>Pending Approval</h2>
-        <div id="pendingList"></div>
-      </div>
-    </div>
-    <div id="allBookingsSection" style="display:none">
-      <div class="card">
-        <h2>All Bookings</h2>
-        <div id="allBookingsList"></div>
-      </div>
-    </div>
-    <div id="resourcesSection" style="display:none">
-      <div class="grid2">
-        <div class="card">
-          <h2>All Resources</h2>
-          <div id="adminResourceList"></div>
+      <!-- MY BOOKINGS -->
+      <div id="viewMine" style="display:none">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">My Bookings</span></div>
+          <div class="panel-body"><div id="myList"></div></div>
         </div>
-        <div class="card">
-          <h2>Add New Resource</h2>
-          <label>Resource Name</label>
-          <input type="text" id="newResName" placeholder="e.g. Seminar Hall A">
-          <label>Type</label>
-          <select id="newResType">
-            <option>Seminar Hall</option><option>Lab</option><option>Conference</option><option>Sports</option>
-          </select>
-          <label>Capacity</label>
-          <input type="text" id="newResCap" placeholder="e.g. 60">
-          <label>Location</label>
-          <input type="text" id="newResLoc" placeholder="e.g. Block A, Floor 2">
-          <div style="margin-top:12px">
-            <button class="btn btn-primary" onclick="addResource()">Add Resource</button>
+      </div>
+
+      <!-- PENDING -->
+      <div id="viewPending" style="display:none">
+        <div class="stats-row">
+          <div class="stat-card s-amber"><div class="stat-num" id="sPend">0</div><div class="stat-lbl">Awaiting Review</div></div>
+          <div class="stat-card s-green"><div class="stat-num" id="sAppr">0</div><div class="stat-lbl">Approved</div></div>
+          <div class="stat-card s-ink" ><div class="stat-num" id="sTotal">0</div><div class="stat-lbl">Total Requests</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Pending Approval</span></div>
+          <div class="panel-body"><div id="pendList"></div></div>
+        </div>
+      </div>
+
+      <!-- ALL BOOKINGS -->
+      <div id="viewAll" style="display:none">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">All Bookings</span></div>
+          <div class="panel-body"><div id="allList"></div></div>
+        </div>
+      </div>
+
+      <!-- MANAGE -->
+      <div id="viewManage" style="display:none">
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">All Resources</span></div>
+            <div id="manResList"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Add New Resource</span></div>
+            <div class="panel-body">
+              <div class="field"><label>Name</label><input type="text" id="nName" placeholder="e.g. Seminar Hall C"></div>
+              <div class="field"><label>Type</label>
+                <select id="nType"><option>Seminar Hall</option><option>Lab</option><option>Conference</option><option>Sports</option></select>
+              </div>
+              <div class="field"><label>Capacity</label><input type="text" id="nCap" placeholder="e.g. 60"></div>
+              <div class="field"><label>Location</label><input type="text" id="nLoc" placeholder="e.g. Block A, Floor 2"></div>
+              <button class="submit-btn" onclick="addResource()">Add Resource →</button>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
 <script>
-const TIME_SLOTS = [
-  '8:00-9:00','9:00-10:00','10:00-11:00','11:00-12:00',
-  '12:00-13:00','13:00-14:00','14:00-15:00','15:00-16:00',
-  '16:00-17:00','17:00-18:00'
-];
-
-let state = {
-  view: 'user',
-  userSection: 'browse',
-  adminSection: 'pending',
-  selectedResource: null,
-  selectedDate: todayStr(),
-  selectedSlot: null,
-  resourceFilter: 'all',
-  resources: [
-    {id:1,name:'Seminar Hall A',type:'Seminar Hall',capacity:120,location:'Block A, Ground Floor'},
-    {id:2,name:'Seminar Hall B',type:'Seminar Hall',capacity:80,location:'Block B, First Floor'},
-    {id:3,name:'Computer Lab 1',type:'Lab',capacity:40,location:'Tech Block, Floor 1'},
-    {id:4,name:'Computer Lab 2',type:'Lab',capacity:40,location:'Tech Block, Floor 2'},
-    {id:5,name:'Physics Lab',type:'Lab',capacity:30,location:'Science Block, Floor 1'},
-    {id:6,name:'Conference Room 1',type:'Conference',capacity:20,location:'Admin Block, Floor 3'},
-    {id:7,name:'Conference Room 2',type:'Conference',capacity:15,location:'Admin Block, Floor 2'},
-    {id:8,name:'Basketball Court',type:'Sports',capacity:30,location:'Sports Complex'},
-    {id:9,name:'Badminton Hall',type:'Sports',capacity:20,location:'Sports Complex'},
-  ],
-  bookings: [],
-  nextId: 100
+const SLOTS=['8:00–9:00','9:00–10:00','10:00–11:00','11:00–12:00','12:00–13:00','13:00–14:00','14:00–15:00','15:00–16:00','16:00–17:00','17:00–18:00'];
+const ICONS={'Seminar Hall':'🏛','Lab':'⚗️','Conference':'💼','Sports':'🏟'};
+const PAGES={
+  browse:{title:'Browse Resources',sub:'Select a space, pick your slot'},
+  mine:{title:'My Bookings',sub:'Your booking history'},
+  pending:{title:'Pending Requests',sub:'Review and approve incoming requests'},
+  all:{title:'All Bookings',sub:'Complete booking history'},
+  manage:{title:'Manage Resources',sub:'Add or remove spaces'},
 };
 
-function todayStr() {
-  return new Date().toISOString().split('T')[0];
+let S={
+  view:'browse',role:'user',filter:'all',
+  selRes:null,selDate:today(),selSlot:null,
+  resources:[
+    {id:1,name:'Seminar Hall A',  type:'Seminar Hall',capacity:120,location:'Block A, Ground Floor'},
+    {id:2,name:'Seminar Hall B',  type:'Seminar Hall',capacity:80, location:'Block B, First Floor'},
+    {id:3,name:'Computer Lab 1',  type:'Lab',          capacity:40, location:'Tech Block, Floor 1'},
+    {id:4,name:'Computer Lab 2',  type:'Lab',          capacity:40, location:'Tech Block, Floor 2'},
+    {id:5,name:'Physics Lab',     type:'Lab',          capacity:30, location:'Science Block, Floor 1'},
+    {id:6,name:'Conf. Room 1',    type:'Conference',   capacity:20, location:'Admin Block, Floor 3'},
+    {id:7,name:'Conf. Room 2',    type:'Conference',   capacity:15, location:'Admin Block, Floor 2'},
+    {id:8,name:'Basketball Court',type:'Sports',       capacity:30, location:'Sports Complex'},
+    {id:9,name:'Badminton Hall',  type:'Sports',       capacity:20, location:'Sports Complex'},
+  ],
+  bookings:[],nextId:100
+};
+
+function today(){return new Date().toISOString().split('T')[0];}
+function fmtDate(s){return new Date(s+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
+function save(){try{localStorage.setItem('cb_w',JSON.stringify({r:S.resources,b:S.bookings,n:S.nextId}));}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('cb_w')||'null');if(d){S.resources=d.r||S.resources;S.bookings=d.b||S.bookings;S.nextId=d.n||S.nextId;}}catch(e){}}
+
+function toast(msg,type='success'){
+  const b=document.getElementById('alertBox');
+  b.style.display='flex';b.className='alert alert-'+type;
+  const ic=type==='success'
+    ?'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
+    :'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>';
+  b.innerHTML=ic+msg;clearTimeout(b._t);b._t=setTimeout(()=>{b.style.display='none';},4200);
 }
 
-function fmtDate(s) {
-  const d = new Date(s + 'T00:00:00');
-  return d.toLocaleDateString('en-IN', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('mobOverlay').classList.add('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mobOverlay').classList.remove('open');}
+
+function setRole(r){
+  S.role=r;
+  document.getElementById('modeUser').classList.toggle('active',r==='user');
+  document.getElementById('modeAdmin').classList.toggle('active',r==='admin');
+  gotoView(r==='user'?'browse':'pending');
 }
 
-function saveState() {
-  try {
-    localStorage.setItem('campusbook_state', JSON.stringify({
-      resources: state.resources,
-      bookings: state.bookings,
-      nextId: state.nextId
-    }));
-  } catch(e) {}
-}
+const VIEWS=['browse','mine','pending','all','manage'];
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 
-function loadState() {
-  try {
-    const saved = localStorage.getItem('campusbook_state');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      state.resources = parsed.resources || state.resources;
-      state.bookings  = parsed.bookings  || state.bookings;
-      state.nextId    = parsed.nextId    || state.nextId;
-    }
-  } catch(e) {}
-}
-
-function showAlert(msg, type='success') {
-  const b = document.getElementById('alertBox');
-  b.style.display = 'block';
-  b.className = 'alert alert-' + type;
-  b.textContent = msg;
-  setTimeout(() => { b.style.display = 'none'; }, 4000);
-}
-
-function switchView(v) {
-  state.view = v;
-  document.getElementById('userView').style.display  = v==='user'  ? '' : 'none';
-  document.getElementById('adminView').style.display = v==='admin' ? '' : 'none';
-  document.getElementById('adminBadge').style.display = v==='admin' ? '' : 'none';
-  const btns = document.querySelectorAll('#mainNav button');
-  btns[0].classList.toggle('active', v==='user');
-  btns[1].classList.toggle('active', v==='admin');
-  if (v==='admin') { updateStats(); renderPendingList(); }
-  else { renderResources(); }
-}
-
-function switchSection(s, view) {
-  if (view === 'user') {
-    state.userSection = s;
-    document.getElementById('browseSection').style.display     = s==='browse'     ? '' : 'none';
-    document.getElementById('myBookingsSection').style.display = s==='myBookings' ? '' : 'none';
-    document.querySelectorAll('#userView > .section-tabs .section-tab').forEach((b,i) => {
-      b.classList.toggle('active', (i===0 && s==='browse') || (i===1 && s==='myBookings'));
-    });
-    if (s === 'myBookings') renderMyBookings();
-  } else {
-    state.adminSection = s;
-    document.getElementById('pendingSection').style.display     = s==='pending'     ? '' : 'none';
-    document.getElementById('allBookingsSection').style.display = s==='allBookings' ? '' : 'none';
-    document.getElementById('resourcesSection').style.display   = s==='resources'   ? '' : 'none';
-    document.querySelectorAll('#adminView > .section-tabs .section-tab').forEach((b,i) => {
-      b.classList.toggle('active',
-        (i===0 && s==='pending') || (i===1 && s==='allBookings') || (i===2 && s==='resources'));
-    });
-    if (s==='pending')     renderPendingList();
-    if (s==='allBookings') renderAllBookings();
-    if (s==='resources')   renderAdminResources();
-  }
-}
-
-function filterResources(f) {
-  state.resourceFilter = f;
-  renderResources();
-}
-
-function renderResources() {
-  const list = document.getElementById('resourceList');
-  const filtered = state.resources.filter(r => state.resourceFilter==='all' || r.type===state.resourceFilter);
-  if (!filtered.length) { list.innerHTML = '<div class="empty">No resources found.</div>'; return; }
-  list.innerHTML = filtered.map(r => `
-    <div class="resource-card ${state.selectedResource===r.id ? 'selected' : ''}" onclick="selectResource(${r.id})">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div class="name">${r.name}</div>
-        <span class="tag">${r.type}</span>
-      </div>
-      <div class="meta">Capacity: ${r.capacity} &nbsp;|&nbsp; ${r.location}</div>
-    </div>
-  `).join('');
-}
-
-function selectResource(id) {
-  state.selectedResource = id;
-  state.selectedSlot = null;
-  renderResources();
-  const r = state.resources.find(x => x.id===id);
-  document.getElementById('noResourceMsg').style.display = 'none';
-  document.getElementById('availPanel').style.display = '';
-  document.getElementById('selectedResourceName').textContent = `${r.name} — ${r.type} (Capacity: ${r.capacity})`;
-  document.getElementById('datePicker').value = state.selectedDate;
-  updateDateDisplay();
-  renderSlots();
-}
-
-function updateDateDisplay() {
-  document.getElementById('dateDisplay').textContent = fmtDate(state.selectedDate);
-}
-
-function changeDate(d) {
-  const dt = new Date(state.selectedDate + 'T00:00:00');
-  dt.setDate(dt.getDate() + d);
-  state.selectedDate = dt.toISOString().split('T')[0];
-  document.getElementById('datePicker').value = state.selectedDate;
-  state.selectedSlot = null;
-  updateDateDisplay();
-  renderSlots();
-}
-
-function onDateChange() {
-  state.selectedDate = document.getElementById('datePicker').value;
-  state.selectedSlot = null;
-  updateDateDisplay();
-  renderSlots();
-}
-
-function getSlotStatus(resourceId, date, slot) {
-  const b = state.bookings.find(x =>
-    x.resourceId===resourceId && x.date===date && x.slot===slot &&
-    (x.status==='approved' || x.status==='pending')
-  );
-  if (!b) return 'free';
-  return b.status;
-}
-
-function renderSlots() {
-  if (!state.selectedResource) return;
-  const grid = document.getElementById('slotGrid');
-  grid.innerHTML = TIME_SLOTS.map(s => {
-    const st  = getSlotStatus(state.selectedResource, state.selectedDate, s);
-    const sel = state.selectedSlot===s && st==='free';
-    return `<div class="slot ${sel ? 'selected' : st}" onclick="selectSlot('${s}','${st}')">${s}<br>
-      <span style="font-size:10px;opacity:0.8">${st}</span></div>`;
-  }).join('');
-  const selPanel = document.getElementById('slotSelection');
-  if (state.selectedSlot) {
-    selPanel.style.display = '';
-    document.getElementById('selectedSlotLabel').textContent = `${fmtDate(state.selectedDate)}, ${state.selectedSlot}`;
-  } else {
-    selPanel.style.display = 'none';
-  }
-}
-
-function selectSlot(slot, status) {
-  if (status !== 'free') return;
-  state.selectedSlot = slot;
-  renderSlots();
-}
-
-function submitBooking() {
-  const name = document.getElementById('reqName').value.trim();
-  const desc = document.getElementById('reqDesc').value.trim();
-  const att  = document.getElementById('reqAttendees').value.trim();
-  if (!name) { showAlert('Please enter your name', 'danger'); return; }
-  if (!desc) { showAlert('Please enter the purpose', 'danger'); return; }
-  if (!state.selectedSlot) { showAlert('Please select a time slot', 'danger'); return; }
-  const conflict = state.bookings.find(b =>
-    b.resourceId===state.selectedResource && b.date===state.selectedDate &&
-    b.slot===state.selectedSlot && (b.status==='approved' || b.status==='pending')
-  );
-  if (conflict) { showAlert('This slot was just taken. Please choose another.', 'danger'); renderSlots(); return; }
-  state.bookings.push({
-    id: state.nextId++,
-    resourceId: state.selectedResource,
-    date: state.selectedDate,
-    slot: state.selectedSlot,
-    name, desc,
-    attendees: att || 'N/A',
-    status: 'pending',
-    time: Date.now()
+function gotoView(v){
+  S.view=v;
+  VIEWS.forEach(id=>{
+    document.getElementById('view'+cap(id)).style.display=id===v?'':'none';
+    document.getElementById('nav'+cap(id)).classList.toggle('active',id===v);
   });
-  document.getElementById('reqName').value = '';
-  document.getElementById('reqDesc').value = '';
-  document.getElementById('reqAttendees').value = '';
-  state.selectedSlot = null;
-  saveState();
-  renderSlots();
-  showAlert('Booking request submitted! Awaiting admin approval.', 'success');
+  document.getElementById('pageTitle').textContent=PAGES[v].title;
+  document.getElementById('pageSub').textContent=PAGES[v].sub;
+  closeSidebar();
+  if(v==='browse') renderResList();
+  if(v==='mine')   renderMine();
+  if(v==='pending'){updateStats();renderPending();}
+  if(v==='all')    renderAll();
+  if(v==='manage') renderManRes();
 }
 
-function renderMyBookings() {
-  const list = document.getElementById('myBookingsList');
-  const all = [...state.bookings].sort((a,b) => b.time - a.time);
-  if (!all.length) { list.innerHTML = '<div class="empty">No bookings yet.</div>'; return; }
-  list.innerHTML = all.map(b => {
-    const r = state.resources.find(x => x.id===b.resourceId);
-    const bc = {pending:'badge-warn',approved:'badge-success',rejected:'badge-danger'}[b.status]||'badge-info';
-    return `<div class="booking-row">
-      <div class="booking-info">
-        <div class="title">${r ? r.name : 'Unknown'} <span class="tag">${r ? r.type : ''}</span></div>
-        <div class="sub">${fmtDate(b.date)} &nbsp;|&nbsp; ${b.slot}</div>
-        <div class="sub">By: ${b.name} &nbsp;|&nbsp; ${b.desc}</div>
-        <div class="sub">Attendees: ${b.attendees}</div>
+function setFilter(f,el){
+  S.filter=f;
+  document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderResList();
+}
+
+function renderResList(){
+  const list=document.getElementById('resList');
+  const items=S.resources.filter(r=>S.filter==='all'||r.type===S.filter);
+  document.getElementById('resCount').textContent=items.length;
+  if(!items.length){list.innerHTML='<div class="empty"><span class="empty-big">None</span>No resources here.</div>';return;}
+  list.innerHTML=items.map(r=>`
+    <div class="res-item ${S.selRes===r.id?'active':''}" onclick="selResource(${r.id})">
+      <div class="res-icon">${ICONS[r.type]||'📌'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="res-name">${r.name}</div>
+        <div class="res-meta">${r.location}</div>
       </div>
-      <div class="booking-actions"><span class="badge ${bc}">${b.status}</span></div>
+      <div class="res-right">
+        <div class="res-cap">${r.capacity}</div>
+        <div class="res-type">${r.type.split(' ')[0]}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selResource(id){
+  S.selRes=id;S.selSlot=null;
+  renderResList();
+  const r=S.resources.find(x=>x.id===id);
+  document.getElementById('availEmpty').style.display='none';
+  document.getElementById('availContent').style.display='';
+  document.getElementById('bnName').textContent=r.name;
+  document.getElementById('bnMeta').textContent=`Capacity ${r.capacity}  ·  ${r.location}`;
+  document.getElementById('datePick').value=S.selDate;
+  renderDateDisp();renderSlots();
+}
+
+function renderDateDisp(){document.getElementById('dateDisp').textContent=fmtDate(S.selDate);}
+function shiftDate(d){
+  const dt=new Date(S.selDate+'T00:00:00');dt.setDate(dt.getDate()+d);
+  S.selDate=dt.toISOString().split('T')[0];
+  document.getElementById('datePick').value=S.selDate;
+  S.selSlot=null;renderDateDisp();renderSlots();
+}
+function pickDate(){S.selDate=document.getElementById('datePick').value;S.selSlot=null;renderDateDisp();renderSlots();}
+
+function slotStatus(rid,date,slot){
+  const b=S.bookings.find(x=>x.rid===rid&&x.date===date&&x.slot===slot&&(x.status==='approved'||x.status==='pending'));
+  return b?b.status:'free';
+}
+function renderSlots(){
+  if(!S.selRes)return;
+  document.getElementById('slotGrid').innerHTML=SLOTS.map(s=>{
+    const st=slotStatus(S.selRes,S.selDate,s);
+    const sel=S.selSlot===s&&st==='free';
+    return`<div class="slot ${sel?'selected':st}" onclick="pickSlot('${s}','${st}')">
+      <span class="slot-t">${s}</span>
+      <span class="slot-s">${{free:'Available',booked:'Booked',pending:'Pending'}[st]}</span>
     </div>`;
   }).join('');
+  const form=document.getElementById('bookForm');
+  if(S.selSlot){
+    form.style.display='';
+    document.getElementById('formSlotLabel').textContent=`${fmtDate(S.selDate)}  ·  ${S.selSlot}`;
+  }else{form.style.display='none';}
+}
+function pickSlot(s,st){if(st!=='free')return;S.selSlot=s;renderSlots();}
+
+function submitBooking(){
+  const name=document.getElementById('fName').value.trim();
+  const desc=document.getElementById('fDesc').value.trim();
+  const att=document.getElementById('fAtt').value.trim();
+  if(!name){toast('Please enter your full name','danger');return;}
+  if(!desc){toast('Please describe the purpose','danger');return;}
+  if(!S.selSlot){toast('Please select a time slot','danger');return;}
+  const clash=S.bookings.find(b=>b.rid===S.selRes&&b.date===S.selDate&&b.slot===S.selSlot&&(b.status==='approved'||b.status==='pending'));
+  if(clash){toast('Slot just taken — choose another','danger');renderSlots();return;}
+  S.bookings.push({id:S.nextId++,rid:S.selRes,date:S.selDate,slot:S.selSlot,name,desc,att:att||'N/A',status:'pending',ts:Date.now()});
+  document.getElementById('fName').value='';
+  document.getElementById('fDesc').value='';
+  document.getElementById('fAtt').value='';
+  S.selSlot=null;save();renderSlots();updateBadge();
+  toast('Request submitted — awaiting admin approval','success');
 }
 
-function updateStats() {
-  document.getElementById('statPending').textContent  = state.bookings.filter(b => b.status==='pending').length;
-  document.getElementById('statApproved').textContent = state.bookings.filter(b => b.status==='approved').length;
-  document.getElementById('statTotal').textContent    = state.bookings.length;
+function renderMine(){
+  const el=document.getElementById('myList');
+  const all=[...S.bookings].sort((a,b)=>b.ts-a.ts);
+  if(!all.length){el.innerHTML='<div class="empty"><span class="empty-big">Nothing yet</span>Go book a space!</div>';return;}
+  el.innerHTML=all.map(b=>bRow(b,false)).join('');
 }
 
-function renderPendingList() {
-  const list = document.getElementById('pendingList');
-  const pending = state.bookings.filter(b => b.status==='pending').sort((a,b) => a.time - b.time);
-  if (!pending.length) { list.innerHTML = '<div class="empty">No pending requests.</div>'; return; }
-  list.innerHTML = pending.map(b => {
-    const r = state.resources.find(x => x.id===b.resourceId);
-    return `<div class="booking-row">
-      <div class="booking-info">
-        <div class="title">${r ? r.name : 'Unknown'} <span class="tag">${r ? r.type : ''}</span></div>
-        <div class="sub">${fmtDate(b.date)} &nbsp;|&nbsp; ${b.slot}</div>
-        <div class="sub">Requested by: <strong>${b.name}</strong> &nbsp;|&nbsp; ${b.desc}</div>
-        <div class="sub">Attendees: ${b.attendees}</div>
-      </div>
-      <div class="booking-actions">
-        <button class="btn btn-success btn-sm" onclick="approveBooking(${b.id})">Approve</button>
-        <button class="btn btn-danger btn-sm"  onclick="rejectBooking(${b.id})">Reject</button>
-      </div>
-    </div>`;
-  }).join('');
+function updateStats(){
+  document.getElementById('sPend').textContent=S.bookings.filter(b=>b.status==='pending').length;
+  document.getElementById('sAppr').textContent=S.bookings.filter(b=>b.status==='approved').length;
+  document.getElementById('sTotal').textContent=S.bookings.length;
+}
+function updateBadge(){
+  const p=S.bookings.filter(b=>b.status==='pending').length;
+  const badge=document.getElementById('sbBadge');
+  badge.style.display=p>0?'':'none';badge.textContent=p;
 }
 
-function renderAllBookings() {
-  const list = document.getElementById('allBookingsList');
-  const all = [...state.bookings].sort((a,b) => b.time - a.time);
-  if (!all.length) { list.innerHTML = '<div class="empty">No bookings found.</div>'; return; }
-  list.innerHTML = all.map(b => {
-    const r  = state.resources.find(x => x.id===b.resourceId);
-    const bc = {pending:'badge-warn',approved:'badge-success',rejected:'badge-danger'}[b.status]||'badge-info';
-    return `<div class="booking-row">
-      <div class="booking-info">
-        <div class="title">${r ? r.name : 'Unknown'} <span class="tag">${r ? r.type : ''}</span></div>
-        <div class="sub">${fmtDate(b.date)} &nbsp;|&nbsp; ${b.slot}</div>
-        <div class="sub">${b.name} — ${b.desc}</div>
-      </div>
-      <div class="booking-actions">
-        <span class="badge ${bc}">${b.status}</span>
-        ${b.status!=='rejected' ? `<button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.id})">Cancel</button>` : ''}
-      </div>
-    </div>`;
-  }).join('');
+function renderPending(){
+  const el=document.getElementById('pendList');
+  const pend=S.bookings.filter(b=>b.status==='pending').sort((a,b)=>a.ts-b.ts);
+  if(!pend.length){el.innerHTML='<div class="empty"><span class="empty-big">All clear</span>No pending requests.</div>';return;}
+  el.innerHTML=pend.map(b=>bRow(b,true,'pending')).join('');
+}
+function renderAll(){
+  const el=document.getElementById('allList');
+  const all=[...S.bookings].sort((a,b)=>b.ts-a.ts);
+  if(!all.length){el.innerHTML='<div class="empty"><span class="empty-big">Empty</span>No bookings yet.</div>';return;}
+  el.innerHTML=all.map(b=>bRow(b,true,'all')).join('');
 }
 
-function approveBooking(id) {
-  const b = state.bookings.find(x => x.id===id);
-  if (!b) return;
-  const conflict = state.bookings.find(x =>
-    x.id!==id && x.resourceId===b.resourceId &&
-    x.date===b.date && x.slot===b.slot && x.status==='approved'
-  );
-  if (conflict) { showAlert('Cannot approve — slot already has an approved booking!', 'danger'); return; }
-  b.status = 'approved';
-  saveState();
-  updateStats(); renderPendingList(); renderAllBookings();
-  if (state.selectedResource) renderSlots();
-  showAlert('Booking approved!', 'success');
-}
-
-function rejectBooking(id) {
-  const b = state.bookings.find(x => x.id===id);
-  if (b) b.status = 'rejected';
-  saveState();
-  updateStats(); renderPendingList(); renderAllBookings();
-  if (state.selectedResource) renderSlots();
-  showAlert('Booking rejected.', 'success');
-}
-
-function cancelBooking(id) {
-  const b = state.bookings.find(x => x.id===id);
-  if (b) b.status = 'rejected';
-  saveState();
-  updateStats(); renderAllBookings();
-  if (state.selectedResource) renderSlots();
-  showAlert('Booking cancelled.', 'success');
-}
-
-function renderAdminResources() {
-  const list = document.getElementById('adminResourceList');
-  list.innerHTML = state.resources.map(r => `
-    <div class="booking-row">
-      <div class="booking-info">
-        <div class="title">${r.name} <span class="tag">${r.type}</span></div>
-        <div class="sub">Capacity: ${r.capacity} &nbsp;|&nbsp; ${r.location}</div>
-      </div>
-      <div class="booking-actions">
-        <button class="btn btn-danger btn-sm" onclick="deleteResource(${r.id})">Remove</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function addResource() {
-  const name = document.getElementById('newResName').value.trim();
-  const type = document.getElementById('newResType').value;
-  const cap  = document.getElementById('newResCap').value.trim();
-  const loc  = document.getElementById('newResLoc').value.trim();
-  if (!name) { showAlert('Enter a resource name', 'danger'); return; }
-  const newId = Math.max(...state.resources.map(r => r.id), 0) + 1;
-  state.resources.push({id:newId, name, type, capacity:cap||'N/A', location:loc||'TBD'});
-  document.getElementById('newResName').value = '';
-  document.getElementById('newResCap').value  = '';
-  document.getElementById('newResLoc').value  = '';
-  saveState();
-  renderAdminResources(); renderResources();
-  showAlert('Resource added!', 'success');
-}
-
-function deleteResource(id) {
-  if (!confirm('Remove this resource?')) return;
-  state.resources = state.resources.filter(r => r.id!==id);
-  if (state.selectedResource === id) {
-    state.selectedResource = null;
-    document.getElementById('noResourceMsg').style.display = '';
-    document.getElementById('availPanel').style.display = 'none';
+function bRow(b,admin,mode){
+  const r=S.resources.find(x=>x.id===b.rid);
+  const bc={pending:'badge-amber',approved:'badge-green',rejected:'badge-red'}[b.status]||'badge-mute';
+  let acts='';
+  if(admin&&mode==='pending'&&b.status==='pending'){
+    acts=`<button class="abtn abtn-approve" onclick="approve(${b.id})">Approve</button>
+          <button class="abtn abtn-reject" onclick="reject(${b.id})">Reject</button>`;
+  }else if(admin&&mode==='all'&&b.status!=='rejected'){
+    acts=`<button class="abtn abtn-cancel" onclick="cancel(${b.id})">Cancel</button>`;
   }
-  saveState();
-  renderAdminResources(); renderResources();
-  showAlert('Resource removed.', 'success');
+  return`<div class="brow">
+    <div class="brow-icon">${r?ICONS[r.type]||'📌':'❓'}</div>
+    <div class="brow-info">
+      <div class="brow-title">${r?r.name:'Deleted Resource'}<span class="ttag">${r?r.type:''}</span><span class="badge ${bc}">${b.status}</span></div>
+      <div class="brow-sub">📅 ${fmtDate(b.date)} &nbsp;·&nbsp; ⏰ ${b.slot}</div>
+      <div class="brow-sub">👤 ${b.name} &nbsp;·&nbsp; ${b.desc}</div>
+      <div class="brow-sub">👥 ${b.att}</div>
+    </div>
+    ${acts?`<div class="brow-acts">${acts}</div>`:''}
+  </div>`;
 }
 
-// Boot
-loadState();
-renderResources();
-updateStats();
+function approve(id){
+  const b=S.bookings.find(x=>x.id===id);if(!b)return;
+  const clash=S.bookings.find(x=>x.id!==id&&x.rid===b.rid&&x.date===b.date&&x.slot===b.slot&&x.status==='approved');
+  if(clash){toast('Slot already approved for another booking!','danger');return;}
+  b.status='approved';save();updateStats();updateBadge();renderPending();renderAll();
+  if(S.selRes)renderSlots();toast('Booking approved!','success');
+}
+function reject(id){
+  const b=S.bookings.find(x=>x.id===id);if(b)b.status='rejected';
+  save();updateStats();updateBadge();renderPending();renderAll();
+  if(S.selRes)renderSlots();toast('Booking rejected','success');
+}
+function cancel(id){
+  const b=S.bookings.find(x=>x.id===id);if(b)b.status='rejected';
+  save();updateStats();updateBadge();renderAll();
+  if(S.selRes)renderSlots();toast('Booking cancelled','success');
+}
+
+function renderManRes(){
+  const el=document.getElementById('manResList');
+  if(!S.resources.length){el.innerHTML='<div class="empty">No resources yet.</div>';return;}
+  el.innerHTML=S.resources.map(r=>`
+    <div class="res-item">
+      <div class="res-icon">${ICONS[r.type]||'📌'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="res-name">${r.name}</div>
+        <div class="res-meta">${r.capacity} capacity · ${r.location}</div>
+      </div>
+      <div class="brow-acts"><button class="abtn abtn-reject" onclick="delRes(${r.id})">Remove</button></div>
+    </div>`).join('');
+}
+function addResource(){
+  const name=document.getElementById('nName').value.trim();
+  const type=document.getElementById('nType').value;
+  const cap=document.getElementById('nCap').value.trim();
+  const loc=document.getElementById('nLoc').value.trim();
+  if(!name){toast('Enter a resource name','danger');return;}
+  const newId=Math.max(...S.resources.map(r=>r.id),0)+1;
+  S.resources.push({id:newId,name,type,capacity:cap||'N/A',location:loc||'TBD'});
+  document.getElementById('nName').value='';
+  document.getElementById('nCap').value='';
+  document.getElementById('nLoc').value='';
+  save();renderManRes();renderResList();toast(`"${name}" added!`,'success');
+}
+function delRes(id){
+  if(!confirm('Remove this resource?'))return;
+  S.resources=S.resources.filter(r=>r.id!==id);
+  if(S.selRes===id){S.selRes=null;document.getElementById('availEmpty').style.display='';document.getElementById('availContent').style.display='none';}
+  save();renderManRes();renderResList();toast('Resource removed','success');
+}
+
+load();gotoView('browse');updateBadge();
 </script>
 </body>
 </html>
-```
-
----
