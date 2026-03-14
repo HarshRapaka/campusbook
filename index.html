@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusBook — Room & Resource Booking System</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh}
+  .app{max-width:1100px;margin:0 auto;padding:1rem}
+  .header{background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .logo{font-size:18px;font-weight:600;letter-spacing:-0.3px}
+  .logo span{color:#185FA5}
+  .nav{display:flex;gap:6px;flex-wrap:wrap}
+  .nav button{padding:6px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:transparent;font-size:13px;cursor:pointer;color:#1a1a1a;transition:background 0.15s}
+  .nav button.active{background:#185FA5;color:#fff;border-color:#185FA5}
+  .nav button:hover:not(.active){background:#f0f0ee}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+  .badge-warn{background:#FAEEDA;color:#633806}
+  .badge-success{background:#EAF3DE;color:#27500A}
+  .badge-danger{background:#FCEBEB;color:#501313}
+  .badge-info{background:#E6F1FB;color:#0C447C}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+  .card h2{font-size:15px;font-weight:600;margin-bottom:1rem}
+  label{font-size:13px;color:#555;display:block;margin-bottom:4px;margin-top:12px}
+  select,input[type=text],input[type=date],textarea{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:#fff;color:#1a1a1a;font-size:13px;font-family:inherit}
+  textarea{resize:vertical;min-height:60px}
+  .btn{padding:8px 18px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:transparent;font-size:13px;cursor:pointer;color:#1a1a1a;transition:all 0.15s;font-family:inherit}
+  .btn:hover{background:#f0f0ee}
+  .btn-primary{background:#185FA5;color:#fff;border-color:#185FA5}
+  .btn-primary:hover{background:#0C447C;border-color:#0C447C}
+  .btn-success{background:#3B6D11;color:#fff;border-color:#3B6D11}
+  .btn-success:hover{background:#27500A}
+  .btn-danger{background:#A32D2D;color:#fff;border-color:#A32D2D}
+  .btn-danger:hover{background:#791F1F}
+  .btn-sm{padding:4px 10px;font-size:12px}
+  .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;margin-top:0.5rem}
+  .slot{padding:6px 8px;border-radius:8px;border:1px solid transparent;font-size:12px;text-align:center;cursor:pointer;transition:all 0.15s}
+  .slot.free{background:#EAF3DE;color:#27500A;border-color:#C0DD97}
+  .slot.free:hover{background:#C0DD97}
+  .slot.booked{background:#FCEBEB;color:#501313;border-color:#F7C1C1;cursor:not-allowed}
+  .slot.pending{background:#FAEEDA;color:#633806;border-color:#FAC775;cursor:not-allowed}
+  .slot.selected{background:#185FA5;color:#fff;border-color:#185FA5}
+  .resource-card{border:1px solid rgba(0,0,0,0.1);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:all 0.15s}
+  .resource-card:hover{border-color:rgba(0,0,0,0.3)}
+  .resource-card.selected{border:2px solid #185FA5;background:#E6F1FB}
+  .resource-card .name{font-size:14px;font-weight:600}
+  .resource-card .meta{font-size:12px;color:#666;margin-top:2px}
+  .booking-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
+  .booking-row:last-child{border-bottom:none}
+  .booking-info{flex:1;min-width:180px}
+  .booking-info .title{font-size:13px;font-weight:600}
+  .booking-info .sub{font-size:12px;color:#666;margin-top:2px}
+  .booking-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+  .alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:1rem}
+  .alert-success{background:#EAF3DE;color:#27500A;border:1px solid #C0DD97}
+  .alert-danger{background:#FCEBEB;color:#501313;border:1px solid #F7C1C1}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:0.75rem}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
+  .legend-dot{width:10px;height:10px;border-radius:2px}
+  .section-tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+  .section-tab{padding:5px 12px;border-radius:20px;font-size:12px;border:1px solid rgba(0,0,0,0.2);background:transparent;cursor:pointer;color:#666}
+  .section-tab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+  .stat{background:#f0f0ee;border-radius:8px;padding:10px 12px}
+  .stat .num{font-size:22px;font-weight:600}
+  .stat .lbl{font-size:12px;color:#666;margin-top:2px}
+  .empty{text-align:center;padding:2rem;color:#888;font-size:13px}
+  .date-nav{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+  .date-nav button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:transparent;cursor:pointer;font-size:14px;color:#1a1a1a;display:flex;align-items:center;justify-content:center}
+  .date-nav span{font-size:14px;font-weight:600}
+  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:#f0f0ee;color:#555;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo"><span>Campus</span>Book — Resource Booking System</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="nav" id="mainNav">
+        <button class="active" onclick="switchView('user')">Student / Faculty</button>
+        <button onclick="switchView('admin')">Admin Panel</button>
+      </div>
+      <span id="adminBadge" class="badge badge-warn" style="display:none">Admin Mode</span>
+    </div>
+  </div>
+
+  <div id="alertBox" style="display:none"></div>
+
+  <!-- USER VIEW -->
+  <div id="userView">
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="switchSection('browse','user')">Browse & Book</button>
+      <button class="section-tab" onclick="switchSection('myBookings','user')">My Bookings</button>
+    </div>
+    <div id="browseSection">
+      <div class="grid2">
+        <div class="card">
+          <h2>Available Resources</h2>
+          <div class="section-tabs" style="margin-bottom:0.75rem">
+            <button class="section-tab active" onclick="filterResources('all')">All</button>
+            <button class="section-tab" onclick="filterResources('Seminar Hall')">Halls</button>
+            <button class="section-tab" onclick="filterResources('Lab')">Labs</button>
+            <button class="section-tab" onclick="filterResources('Conference')">Conf. Rooms</button>
+            <button class="section-tab" onclick="filterResources('Sports')">Sports</button>
+          </div>
+          <div id="resourceList"></div>
+        </div>
+        <div class="card">
+          <h2>Check Availability & Book</h2>
+          <div id="noResourceMsg" style="color:#888;font-size:13px">Select a resource to view availability.</div>
+          <div id="availPanel" style="display:none">
+            <div style="font-size:14px;font-weight:600;margin-bottom:0.5rem" id="selectedResourceName"></div>
+            <div class="date-nav">
+              <button onclick="changeDate(-1)">&#8249;</button>
+              <span id="dateDisplay"></span>
+              <button onclick="changeDate(1)">&#8250;</button>
+              <input type="date" id="datePicker" style="width:auto;margin-left:auto;font-size:12px;padding:4px 8px" onchange="onDateChange()">
+            </div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#639922"></div> Free</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#E24B4A"></div> Booked</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#BA7517"></div> Pending</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div> Selected</div>
+            </div>
+            <div class="slot-grid" id="slotGrid"></div>
+            <div id="slotSelection" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,0.08)">
+              <div style="font-size:13px;font-weight:600;margin-bottom:0.5rem">Selected: <span id="selectedSlotLabel"></span></div>
+              <label>Your Name</label>
+              <input type="text" id="reqName" placeholder="Full name">
+              <label>Purpose / Description</label>
+              <textarea id="reqDesc" placeholder="Describe the purpose of this booking..."></textarea>
+              <label>Expected Attendees</label>
+              <input type="text" id="reqAttendees" placeholder="e.g. 30 students">
+              <div style="margin-top:12px">
+                <button class="btn btn-primary" onclick="submitBooking()">Submit Booking Request</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="myBookingsSection" style="display:none">
+      <div class="card">
+        <h2>My Booking History</h2>
+        <div id="myBookingsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="adminView" style="display:none">
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="switchSection('pending','admin')">Pending Requests</button>
+      <button class="section-tab" onclick="switchSection('allBookings','admin')">All Bookings</button>
+      <button class="section-tab" onclick="switchSection('resources','admin')">Manage Resources</button>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="num" id="statPending">0</div><div class="lbl">Pending</div></div>
+      <div class="stat"><div class="num" id="statApproved">0</div><div class="lbl">Approved</div></div>
+      <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Requests</div></div>
+    </div>
+    <div id="pendingSection">
+      <div class="card">
+        <h2>Pending Approval</h2>
+        <div id="pendingList"></div>
+      </div>
+    </div>
+    <div id="allBookingsSection" style="display:none">
+      <div class="card">
+        <h2>All Bookings</h2>
+        <div id="allBookingsList"></div>
+      </div>
+    </div>
+    <div id="resourcesSection" style="display:none">
+      <div class="grid2">
+        <div class="card">
+          <h2>All Resources</h2>
+          <div id="adminResourceList"></div>
+        </div>
+        <div class="card">
+          <h2>Add New Resource</h2>
+          <label>Resource Name</label>
+          <input type="text" id="newResName" placeholder="e.g. Seminar Hall A">
+          <label>Type</label>
+          <select id="newResType">
+            <option>Seminar Hall</option><option>Lab</option><option>Conference</option><option>Sports</option>
+          </select>
+          <label>Capacity</label>
+          <input type="text" id="newResCap" placeholder="e.g. 60">
+          <label>Location</label>
+          <input type="text" id="newResLoc" placeholder="e.g. Block A, Floor 2">
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" onclick="addResource()">Add Resource</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TIME_SLOTS = [
+  '8:00-9:00','9:00-10:00','10:00-11:00','11:00-12:00',
+  '12:00-13:00','13:00-14:00','14:00-15:00','15:00-16:00',
+  '16:00-17:00','17:00-18:00'
+];
+
+let state = {
+  view: 'user',
+  userSection: 'browse',
+  adminSection: 'pending',
+  selectedResource: null,
+  selectedDate: todayStr(),
+  selectedSlot: null,
+  resourceFilter: 'all',
+  resources: [
+    {id:1,name:'Seminar Hall A',type:'Seminar Hall',capacity:120,location:'Block A, Ground Floor'},
+    {id:2,name:'Seminar Hall B',type:'Seminar Hall',capacity:80,location:'Block B, First Floor'},
+    {id:3,name:'Computer Lab 1',type:'Lab',capacity:40,location:'Tech Block, Floor 1'},
+    {id:4,name:'Computer Lab 2',type:'Lab',capacity:40,location:'Tech Block, Floor 2'},
+    {id:5,name:'Physics Lab',type:'Lab',capacity:30,location:'Science Block, Floor 1'},
+    {id:6,name:'Conference Room 1',type:'Conference',capacity:20,location:'Admin Block, Floor 3'},
+    {id:7,name:'Conference Room 2',type:'Conference',capacity:15,location:'Admin Block, Floor 2'},
+    {id:8,name:'Basketball Court',type:'Sports',capacity:30,location:'Sports Complex'},
+    {id:9,name:'Badminton Hall',type:'Sports',capacity:20,location:'Sports Complex'},
+  ],
+  bookings: [],
+  nextId: 100
+};
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function fmtDate(s) {
+  const d = new Date(s + 'T00:00:00');
+  return d.toLocaleDateString('en-IN', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('campusbook_state', JSON.stringify({
+      resources: state.resources,
+      bookings: state.bookings,
+      nextId: state.nextId
+    }));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('campusbook_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state.resources = parsed.resources || state.resources;
+      state.bookings  = parsed.bookings  || state.bookings;
+      state.nextId    = parsed.nextId    || state.nextId;
+    }
+  } catch(e) {}
+}
+
+function showAlert(msg, type='success') {
+  const b = document.getElementById('alertBox');
+  b.style.display = 'block';
+  b.className = 'alert alert-' + type;
+  b.textContent = msg;
+  setTimeout(() => { b.style.display = 'none'; }, 4000);
+}
+
+function switchView(v) {
+  state.view = v;
+  document.getElementById('userView').style.display  = v==='user'  ? '' : 'none';
+  document.getElementById('adminView').style.display = v==='admin' ? '' : 'none';
+  document.getElementById('adminBadge').style.display = v==='admin' ? '' : 'none';
+  const btns = document.querySelectorAll('#mainNav button');
+  btns[0].classList.toggle('active', v==='user');
+  btns[1].classList.toggle('active', v==='admin');
+  if (v==='admin') { updateStats(); renderPendingList(); }
+  else { renderResources(); }
+}
+
+function switchSection(s, view) {
+  if (view === 'user') {
+    state.userSection = s;
+    document.getElementById('browseSection').style.display     = s==='browse'     ? '' : 'none';
+    document.getElementById('myBookingsSection').style.display = s==='myBookings' ? '' : 'none';
+    document.querySelectorAll('#userView > .section-tabs .section-tab').forEach((b,i) => {
+      b.classList.toggle('active', (i===0 && s==='browse') || (i===1 && s==='myBookings'));
+    });
+    if (s === 'myBookings') renderMyBookings();
+  } else {
+    state.adminSection = s;
+    document.getElementById('pendingSection').style.display     = s==='pending'     ? '' : 'none';
+    document.getElementById('allBookingsSection').style.display = s==='allBookings' ? '' : 'none';
+    document.getElementById('resourcesSection').style.display   = s==='resources'   ? '' : 'none';
+    document.querySelectorAll('#adminView > .section-tabs .section-tab').forEach((b,i) => {
+      b.classList.toggle('active',
+        (i===0 && s==='pending') || (i===1 && s==='allBookings') || (i===2 && s==='resources'));
+    });
+    if (s==='pending')     renderPendingList();
+    if (s==='allBookings') renderAllBookings();
+    if (s==='resources')   renderAdminResources();
+  }
+}
+
+function filterResources(f) {
+  state.resourceFilter = f;
+  renderResources();
+}
+
+function renderResources() {
+  const list = document.getElementById('resourceList');
+  const filtered = state.resources.filter(r => state.resourceFilter==='all' || r.type===state.resourceFilter);
+  if (!filtered.length) { list.innerHTML = '<div class="empty">No resources found.</div>'; return; }
+  list.innerHTML = filtered.map(r => `
+    <div class="resource-card ${state.selectedResource===r.id ? 'selected' : ''}" onclick="selectResource(${r.id})">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="name">${r.name}</div>
+        <span class="tag">${r.type}</span>
+      </div>
+      <div class="meta">Capacity: ${r.capacity} &nbsp;|&nbsp; ${r.location}</div>
+    </div>
+  `).join('');
+}
+
+function selectResource(id) {
+  state.selectedResource = id;
+  state.selectedSlot = null;
+  renderResources();
+  const r = state.resources.find(x => x.id===id);
+  document.getElementById('noResourceMsg').style.display = 'none';
+  document.getElementById('availPanel').style.display = '';
+  document.getElementById('selectedResourceName').textContent = `${r.name} — ${r.type} (Capacity: ${r.capacity})`;
+  document.getElementById('datePicker').value = state.selectedDate;
+  updateDateDisplay();
+  renderSlots();
+}
+
+function updateDateDisplay() {
+  document.getElementById('dateDisplay').textContent = fmtDate(state.selectedDate);
+}
+
+function changeDate(d) {
+  const dt = new Date(state.selectedDate + 'T00:00:00');
+  dt.setDate(dt.getDate() + d);
+  state.selectedDate = dt.toISOString().split('T')[0];
+  document.getElementById('datePicker').value = state.selectedDate;
+  state.selectedSlot = null;
+  updateDateDisplay();
+  renderSlots();
+}
+
+function onDateChange() {
+  state.selectedDate = document.getElementById('datePicker').value;
+  state.selectedSlot = null;
+  updateDateDisplay();
+  renderSlots();
+}
+
+function getSlotStatus(resourceId, date, slot) {
+  const b = state.bookings.find(x =>
+    x.resourceId===resourceId && x.date===date && x.slot===slot &&
+    (x.status==='approved' || x.status==='pending')
+  );
+  if (!b) return 'free';
+  return b.status;
+}
+
+function renderSlots() {
+  if (!state.selectedResource) return;
+  const grid = document.getElementById('slotGrid');
+  grid.innerHTML = TIME_SLOTS.map(s => {
+    const st  = getSlotStatus(state.selectedResource, state.selectedDate, s);
+    const sel = state.selectedSlot===s && st==='free';
+    return `<div class="slot ${sel ? 'selected' : st}" onclick="selectSlot('${s}','${st}')">${s}<br>
+      <span style="font-size:10px;opacity:0.8">${st}</span></div>`;
+  }).join('');
+  const selPanel = document.getElementById('slotSelection');
+  if (state.selectedSlot) {
+    selPanel.style.display = '';
+    document.getElementById('selectedSlotLabel').textContent = `${fmtDate(state.selectedDate)}, ${state.selectedSlot}`;
+  } else {
+    selPanel.style.display = 'none';
+  }
+}
+
+function selectSlot(slot, status) {
+  if (status !== 'free') return;
+  state.selectedSlot = slot;
+  renderSlots();
+}
+
+function submitBooking() {
+  const name = document.getElementById('reqName').value.trim();
+  const desc = document.getElementById('reqDesc').value.trim();
+  const att  = document.getElementById('reqAttendees').value.trim();
+  if (!name) { showAlert('Please enter your name', 'danger'); return; }
+  if (!desc) { showAlert('Please enter the purpose', 'danger'); return; }
+  if (!state.selectedSlot) { showAlert('Please select a time slot', 'danger'); return; }
+  const conflict = state.bookings.find(b =>
+    b.resourceId===state.selectedResource && b.date===state.selectedDate &&
+    b.slot===state.selectedSlot && (b.status==='approved' || b.status==='pending')
+  );
+  if (conflict) { showAlert('This slot was just taken. Please choose another.', 'danger'); renderSlots(); return; }
+  state.bookings.push({
+    id: state.nextId++,
+    resourceId: state.selectedResource,
+    date: state.selectedDate,
+    slot: state.selectedSlot,
+    name, desc,
+    attendees: att || 'N/A',
+    status: 'pending',
+    time: Date.now()
+  });
+  document.getElementById('reqName').value = '';
+  document.getElementById('reqDesc').value = '';
+  document.getElementById('reqAttendees').value = '';
+  state.selectedSlot = null;
+  saveState();
+  renderSlots();
+  showAlert('Booking request submitted! Awaiting admin approval.', 'success');
+}
+
+function renderMyBookings() {
+  const list = document.getElementById('myBookingsList');
+  const all = [...state.bookings].sort((a,b) => b.time - a.time);
+  if (!all.length) { list.innerHTML = '<div class="empty">No bookings yet.</div>'; return; }
+  list.innerHTML = all.map(b => {
+    const r = state.resources.find(x => x.id===b.resourceId);
+    const bc = {pending:'badge-warn',approved:'badge-success',rejected:'badge-danger'}[b.status]||'badge-info';
+    return `<div class="booking-row">
+      <div class="booking-info">
+        <div class="title">${r ? r.name : 'Unknown'} <span class="tag">${r ? r.type : ''}</span></div>
+        <div class="sub">${fmtDate(b.date)} &nbsp;|&nbsp; ${b.slot}</div>
+        <div class="sub">By: ${b.name} &nbsp;|&nbsp; ${b.desc}</div>
+        <div class="sub">Attendees: ${b.attendees}</div>
+      </div>
+      <div class="booking-actions"><span class="badge ${bc}">${b.status}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  document.getElementById('statPending').textContent  = state.bookings.filter(b => b.status==='pending').length;
+  document.getElementById('statApproved').textContent = state.bookings.filter(b => b.status==='approved').length;
+  document.getElementById('statTotal').textContent    = state.bookings.length;
+}
+
+function renderPendingList() {
+  const list = document.getElementById('pendingList');
+  const pending = state.bookings.filter(b => b.status==='pending').sort((a,b) => a.time - b.time);
+  if (!pending.length) { list.innerHTML = '<div class="empty">No pending requests.</div>'; return; }
+  list.innerHTML = pending.map(b => {
+    const r = state.resources.find(x => x.id===b.resourceId);
+    return `<div class="booking-row">
+      <div class="booking-info">
+        <div class="title">${r ? r.name : 'Unknown'} <span class="tag">${r ? r.type : ''}</span></div>
+        <div class="sub">${fmtDate(b.date)} &nbsp;|&nbsp; ${b.slot}</div>
+        <div class="sub">Requested by: <strong>${b.name}</strong> &nbsp;|&nbsp; ${b.desc}</div>
+        <div class="sub">Attendees: ${b.attendees}</div>
+      </div>
+      <div class="booking-actions">
+        <button class="btn btn-success btn-sm" onclick="approveBooking(${b.id})">Approve</button>
+        <button class="btn btn-danger btn-sm"  onclick="rejectBooking(${b.id})">Reject</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAllBookings() {
+  const list = document.getElementById('allBookingsList');
+  const all = [...state.bookings].sort((a,b) => b.time - a.time);
+  if (!all.length) { list.innerHTML = '<div class="empty">No bookings found.</div>'; return; }
+  list.innerHTML = all.map(b => {
+    const r  = state.resources.find(x => x.id===b.resourceId);
+    const bc = {pending:'badge-warn',approved:'badge-success',rejected:'badge-danger'}[b.status]||'badge-info';
+    return `<div class="booking-row">
+      <div class="booking-info">
+        <div class="title">${r ? r.name : 'Unknown'} <span class="tag">${r ? r.type : ''}</span></div>
+        <div class="sub">${fmtDate(b.date)} &nbsp;|&nbsp; ${b.slot}</div>
+        <div class="sub">${b.name} — ${b.desc}</div>
+      </div>
+      <div class="booking-actions">
+        <span class="badge ${bc}">${b.status}</span>
+        ${b.status!=='rejected' ? `<button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.id})">Cancel</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function approveBooking(id) {
+  const b = state.bookings.find(x => x.id===id);
+  if (!b) return;
+  const conflict = state.bookings.find(x =>
+    x.id!==id && x.resourceId===b.resourceId &&
+    x.date===b.date && x.slot===b.slot && x.status==='approved'
+  );
+  if (conflict) { showAlert('Cannot approve — slot already has an approved booking!', 'danger'); return; }
+  b.status = 'approved';
+  saveState();
+  updateStats(); renderPendingList(); renderAllBookings();
+  if (state.selectedResource) renderSlots();
+  showAlert('Booking approved!', 'success');
+}
+
+function rejectBooking(id) {
+  const b = state.bookings.find(x => x.id===id);
+  if (b) b.status = 'rejected';
+  saveState();
+  updateStats(); renderPendingList(); renderAllBookings();
+  if (state.selectedResource) renderSlots();
+  showAlert('Booking rejected.', 'success');
+}
+
+function cancelBooking(id) {
+  const b = state.bookings.find(x => x.id===id);
+  if (b) b.status = 'rejected';
+  saveState();
+  updateStats(); renderAllBookings();
+  if (state.selectedResource) renderSlots();
+  showAlert('Booking cancelled.', 'success');
+}
+
+function renderAdminResources() {
+  const list = document.getElementById('adminResourceList');
+  list.innerHTML = state.resources.map(r => `
+    <div class="booking-row">
+      <div class="booking-info">
+        <div class="title">${r.name} <span class="tag">${r.type}</span></div>
+        <div class="sub">Capacity: ${r.capacity} &nbsp;|&nbsp; ${r.location}</div>
+      </div>
+      <div class="booking-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteResource(${r.id})">Remove</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addResource() {
+  const name = document.getElementById('newResName').value.trim();
+  const type = document.getElementById('newResType').value;
+  const cap  = document.getElementById('newResCap').value.trim();
+  const loc  = document.getElementById('newResLoc').value.trim();
+  if (!name) { showAlert('Enter a resource name', 'danger'); return; }
+  const newId = Math.max(...state.resources.map(r => r.id), 0) + 1;
+  state.resources.push({id:newId, name, type, capacity:cap||'N/A', location:loc||'TBD'});
+  document.getElementById('newResName').value = '';
+  document.getElementById('newResCap').value  = '';
+  document.getElementById('newResLoc').value  = '';
+  saveState();
+  renderAdminResources(); renderResources();
+  showAlert('Resource added!', 'success');
+}
+
+function deleteResource(id) {
+  if (!confirm('Remove this resource?')) return;
+  state.resources = state.resources.filter(r => r.id!==id);
+  if (state.selectedResource === id) {
+    state.selectedResource = null;
+    document.getElementById('noResourceMsg').style.display = '';
+    document.getElementById('availPanel').style.display = 'none';
+  }
+  saveState();
+  renderAdminResources(); renderResources();
+  showAlert('Resource removed.', 'success');
+}
+
+// Boot
+loadState();
+renderResources();
+updateStats();
+</script>
+</body>
+</html>
+```
+
+---
